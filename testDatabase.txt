@@ -1,0 +1,22 @@
+1. Check operation in database
+create user table with 2 fields age(int), name varchar(20)
+CREATE TABLE users {
+  age int,
+  name varchar(20)
+}
+
+2. Check create record
+create one record with name "Nguyen Anh Khiem", age : 21 -> success
+INSERT INTO users(age, name)
+VALUES (21, "Nguyen Anh Khiem");
+select * from users; 
+
+
+3. Check type of fields in table
+create on record with name "Nguyen Anh Khiem", age "a" -> fail (wrong type)
+INSERT INTO users(age, name)
+VALUES ("a", "Nguyen Anh Khiem");
+
+4. Check scope of type 
+INSERT INTO users(age, name)
+VALUES ("a", "Nguyen Anh Khiemajckhaiocjasdasfa"); -> fail (field name max 20 chars)

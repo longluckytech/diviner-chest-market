@@ -1,0 +1,38 @@
+Deploy 10 token, sử dụng như LP ứng với mỗi pool
+
+Mint moi user 10 token
+
+Add 10 pool vào masterchef, các pool có allocPoint = nhau 
+Deploy prediction
+Add 10 pool vào Prediction, map poolId qua masterchef, allocPoint ngang nhau 
+
+User 1 1 long 1 short 
+User 2 0 long 1 short
+User 3 1 long 1 short
+User 4 0 long 1 short
+User 5 1 long 1 short
+
+
+1 Prediction chia 10 pool co alloc point = nhau
+10 dpt / block => moi pool 1 dpt / block; 
+User 1 chiem 1/4 pool 0  
+User 1 nhan 0.25 dpt / block 
+
+
+Case 1 : 2 block sau khi locking, withdraw 1 short tu user 1 
+=> Expect thu phi, tra ve 0.95 token short 
+Expect nhan duoc 0.5 dpt 
+Expect cap nhat reward debt 0.25 dpt 
+
+
+Case 2 : Round 1 ket thuc, short thang
+Gia su tu khi lock toi khi ket thuc round la 100 block 
+=> Masterchef tao ra 400 cake
+=> Moi pool nhan thuong 40 cake
+=> CakePerShort = 8
+Tang them 10 block 
+Deposit 1 long => claim 8 cake, 2.5 dpt
+Withdraw 1 short => Khong nhan duoc gi, ko bi tru thue, tang 1 balance 
+
+
+
