@@ -2,7 +2,7 @@ import { Signer } from "ethers";
 import fs from "fs";
 import { ethers } from "hardhat";
 import path from "path";
-import { AngelCreedEquipment, BNBHCharacter } from "../../typechain";
+import { AngelCreedEquipment, BNBHCharacter } from "../../../typechain";
 
 const GAME_ADMIN = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes("GAME_ADMIN")

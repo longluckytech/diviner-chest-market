@@ -17,7 +17,7 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
 
   uint256[] public heroRarities;
   uint256[] public heroNames;
-  uint256[] public randomTable;
+  uint8[100][6] public randomTable; // 6 type egg, 4 rarity
   uint8[4] public heroTypeLength; // amount of hero in same rarities
 
   // Follow pattern ERC721 Enumerable
@@ -62,6 +62,13 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
 
   function setHeroRarity(uint256[] memory values) external onlyOwner {
     heroRarities = values;
+  }
+
+  function setRandomTableWithEggType(uint8 eggType, uint8[100] memory values)
+    external
+    onlyOwner
+  {
+    randomTable[eggType] = values;
   }
 
   function tokensOfOwner(address owner)
@@ -180,40 +187,19 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     view
     returns (HeroLibrary.Hero memory)
   {
-    return _getHero(_heroId);
-  }
-
-  function getRarity(uint256 _heroId) external view returns (uint256) {
-    return _heroes[_heroId].heroRarity;
-  }
-
-  function _getHero(uint256 _heroId)
-    internal
-    view
-    returns (HeroLibrary.Hero memory)
-  {
     require(_heroId < _heroes.length, "Does not exist hero");
     HeroLibrary.Hero memory hero = _heroes[_heroId];
 
     return hero;
   }
 
-  function getRandomInRange(
+  function mint(
+    address minter,
     uint256 seed,
-    uint256 min,
-    uint256 max
-  ) internal pure returns (uint256) {
-    uint256 range = max - min + 1;
-    return (seed % range) + min;
-  }
-
-  function mint(address minter, uint256 seed)
-    external
-    restricted
-    returns (uint256)
-  {
+    uint8 eggType
+  ) external restricted returns (uint256) {
     uint256 id = _heroes.length;
-    uint256 seedNum = randomTable[seed % 100];
+    uint256 seedNum = randomTable[eggType][seed % 100];
     uint256 heroNameNum = seed % heroTypeLength[seedNum];
     _heroes.push(HeroLibrary.Hero(id, seedNum, heroNames[heroNameNum]));
     _safeMint(minter, id);
