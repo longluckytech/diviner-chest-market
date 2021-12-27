@@ -19,27 +19,19 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
   IERC20 public angelToken;
   IERC20 public creedToken;
 
-  struct Quotation {
-    uint256 usdToCreateHero;
-    uint256 angelToCreateHero;
+  struct Egg {
+    uint256 gemToBuy;
+    uint256 angelToBuy;
+    uint256 maxEggCanBuy;
   }
 
   mapping(address => uint256[6]) public users; // so luong trung da mua
-
-  uint256 public maxEggCanBuy = 10;
 
   event UpdatedTokenContract(address tokenAddress);
   event UpdatedCharacterContract(address characterAddress);
   event CreatedHero(address player, uint256 _heroId);
 
-  mapping(address => bool) public bannedList;
-  mapping(address => uint256) public chestsOwned; // user => fragments key owned
-
-  uint256 public fragmentsNeedToOpenChest = 10;
-
-  uint256[] public feeToLevelup;
-
-  Quotation[] public quotations;
+  mapping(uint8 => Egg) public eggs; // egg type => max egg
 
   address[2] public tokensToCreateHero;
 
@@ -60,12 +52,14 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
     characters = _character;
   }
 
-  function setTokensToCreateHero(address[2] memory values) public onlyOwner {
+  function setTokensToBuy(address[2] memory values) public onlyOwner {
     tokensToCreateHero = values;
   }
 
-  function setMaxEggCanBuy(uint8 maxEgg) external onlyOwner {
-    maxEggCanBuy = maxEgg;
+  function setEggs(uint8 eggType, uint256[] memory values) public onlyOwner {
+    eggs[eggType].angelToBuy = values[0];
+    eggs[eggType].gemToBuy = values[1];
+    eggs[eggType].maxEggCanBuy = values[2];
   }
 
   function setAngelTokenContract(address tokenAddress) public onlyOwner {
@@ -92,9 +86,15 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
       );
   }
 
-  function createNewHero(uint256 tokenIndex, uint8 eggType) external {
+  function buyEgg(uint256 tokenIndex, uint8 eggType) external {
     uint256 length = tokensToCreateHero.length;
     require(tokenIndex < length, "not valid token");
+    require(eggType >= 0 && eggType < 6, "Out of egg type");
+    require(
+      users[msg.sender][eggType] < eggs[eggType].maxEggCanBuy,
+      "you have bought the allowed egg"
+    );
+    users[msg.sender][eggType]++;
 
     uint256 seed = random(msg.sender);
     uint256 heroId = characters.mint(msg.sender, seed, eggType);
@@ -102,9 +102,9 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
     uint256 price;
 
     if (tokenIndex == 0) {
-      price = quotations[eggType].angelToCreateHero;
+      price = eggs[eggType].angelToBuy;
     } else if (tokenIndex == 1) {
-      price = quotations[eggType].usdToCreateHero;
+      price = eggs[eggType].gemToBuy;
     }
 
     IERC20 token = IERC20(tokensToCreateHero[tokenIndex]);

@@ -15,16 +15,15 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
   bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
   bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
 
-  uint256[] public heroRarities;
-  uint256[] public heroNames;
-  uint8[100][6] public randomTable; // 6 type egg, 4 rarity
   uint8[4] public heroTypeLength; // amount of hero in same rarities
 
+  mapping(uint8 => uint8[]) public randomTable; // 6 type egg, 4 rarity
   // Follow pattern ERC721 Enumerable
   HeroLibrary.Hero[] private _heroes;
   mapping(uint256 => uint256) private _heroesIndex;
   mapping(address => uint256[]) private _ownedTokens;
   mapping(uint256 => uint256) private _ownedTokensIndex;
+  uint256 public stateLastTokenId = 1;
 
   string private baseURI;
 
@@ -60,11 +59,7 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     _grantRole(GAME_ADMIN, _gameAdmin);
   }
 
-  function setHeroRarity(uint256[] memory values) external onlyOwner {
-    heroRarities = values;
-  }
-
-  function setRandomTableWithEggType(uint8 eggType, uint8[100] memory values)
+  function setRandomTableWithEggType(uint8 eggType, uint8[] memory values)
     external
     onlyOwner
   {
@@ -107,21 +102,8 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     return _heroes[index];
   }
 
-  function addStatHero(uint256 heroRarity, uint256 heroName)
-    external
-    onlyOwner
-  {
-    heroRarities.push(heroRarity);
-    heroNames.push(heroName);
-  }
-
-  function updateHero(
-    uint8 index,
-    uint256 heroRarity,
-    uint256 heroName
-  ) external onlyOwner {
-    heroRarities[index] = (heroRarity);
-    heroNames[index] = (heroName);
+  function addHero(uint256 rarity) external onlyOwner {
+    heroTypeLength[rarity]++;
   }
 
   /**
@@ -198,12 +180,16 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     uint256 seed,
     uint8 eggType
   ) external restricted returns (uint256) {
-    uint256 id = _heroes.length;
-    uint256 seedNum = randomTable[eggType][seed % 100];
-    uint256 heroNameNum = seed % heroTypeLength[seedNum];
-    _heroes.push(HeroLibrary.Hero(id, seedNum, heroNames[heroNameNum]));
-    _safeMint(minter, id);
-    return id;
+    uint256 heroRarity = randomTable[eggType][seed % 100];
+    // console.log("heroRarity", heroRarity);
+    uint256 heroName = seed % heroTypeLength[heroRarity];
+    // console.log("heroName", heroName);
+
+    _heroes.push(HeroLibrary.Hero(stateLastTokenId, heroRarity, heroName));
+    _safeMint(minter, stateLastTokenId);
+    stateLastTokenId++;
+
+    return stateLastTokenId;
   }
 
   function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
