@@ -171,10 +171,21 @@ describe("Angles creed", function () {
     // User 1 : 1,3,4
     // User 2 : 2
     await game.connect(signers[1]).buyEgg(0, 5);
-    await game.connect(signers[1]).buyEgg(0, 5);
+    await game.connect(signers[1]).buyEgg(1, 5);
     await expect(game.connect(signers[1]).buyEgg(0, 5)).to.be.reverted;
-    // await game.connect(signers[1]).buyEgg(0, 1);
-    // await game.connect(signers[1]).buyEgg(0, 2);
-    // await game.connect(signers[1]).buyEgg(1, 3);
+    // console.log("tokenIds", await character.tokensOfOwner(users[1]));
+    // console.log("tokenIds", await character.tokenOfOwnerByIndex(users[1], 0));
+  });
+  it("Should burn with game admin", async () => {
+    const tokenIds1 = await character.tokensOfOwner(users[1]);
+    console.log("tokenIds1", tokenIds1);
+
+    await character.connect(deployer).burn(tokenIds1[0].toString());
+    const tokenIds2 = await character.tokensOfOwner(users[1]);
+    console.log("tokenIds2", tokenIds2);
+
+    // expect((await character.tokensOfOwner(users[1])).length).equal(
+    //   tokenIds.length - 1
+    // );
   });
 });

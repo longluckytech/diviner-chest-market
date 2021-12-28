@@ -2,7 +2,12 @@ import { Signer } from "ethers";
 import fs from "fs";
 import { ethers } from "hardhat";
 import path from "path";
-import { BNBHero, BNBHCharacter, AngelsCreedToken } from "../../../typechain";
+import {
+  BNBHero,
+  BNBHCharacter,
+  AngelsCreedToken,
+  GemToken,
+} from "../../../typechain";
 import { createRandomTable } from "../../../config/wiki";
 
 const GAME_ADMIN = ethers.utils.keccak256(
@@ -97,7 +102,7 @@ const setGameAdmin = async () => {
   )) as BNBHCharacter;
 
   await character.connect(deployer).setGameAdmin(gameAddress);
-  // await character.connect(deployer).setGameAdmin(await deployer.getAddress());
+  await character.connect(deployer).setGameAdmin(await deployer.getAddress());
 };
 
 const setRandomTable = async () => {
@@ -109,10 +114,10 @@ const setRandomTable = async () => {
   )) as BNBHCharacter;
   await character.connect(deployer).setRandomTableWithEggType(0, randomTable);
   await character.connect(deployer).setRandomTableWithEggType(1, randomTable2);
-  await character.connect(deployer).setRandomTableWithEggType(2, randomTable6);
-  await character.connect(deployer).setRandomTableWithEggType(3, randomTable3);
-  await character.connect(deployer).setRandomTableWithEggType(4, randomTable4);
-  await character.connect(deployer).setRandomTableWithEggType(5, randomTable5);
+  await character.connect(deployer).setRandomTableWithEggType(2, randomTable3);
+  await character.connect(deployer).setRandomTableWithEggType(3, randomTable4);
+  await character.connect(deployer).setRandomTableWithEggType(4, randomTable5);
+  await character.connect(deployer).setRandomTableWithEggType(5, randomTable6);
 };
 
 const setEggs = async () => {
@@ -164,29 +169,80 @@ const setEggs = async () => {
     ]);
 };
 
-const initialSetup = async () => {
-  await setGameAdmin();
-  await setRandomTable();
-  await setEggs();
+const setTokenToBuyEgg = async () => {
+  const {
+    gem: gemAddress,
+    angel: angelAddress,
+    game: gameAddress,
+  } = getAllAddresses();
+  const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
+
+  await game.connect(deployer).setTokensToBuy([angelAddress, gemAddress]);
 };
 
-const test = async () => {
-  const { game: gameAddress, angel: angelAddress, character: characterAddress } = getAllAddresses();
+const addHero = async () => {
+  const { character: characterAddress, game: gameAddress } = getAllAddresses();
 
-  const angel = (await ethers.getContractAt(
-    "AngelsCreedToken",
-    angelAddress
-  )) as AngelsCreedToken;
-  const game = (await ethers.getContractAt("BNBHero", angelAddress)) as BNBHero;
   const character = (await ethers.getContractAt(
     "BNBHCharacter",
     characterAddress
   )) as BNBHCharacter;
 
+  await character.connect(deployer).addHero(0);
+  await character.connect(deployer).addHero(0);
+  await character.connect(deployer).addHero(1);
+  await character.connect(deployer).addHero(2);
+  await character.connect(deployer).addHero(3);
+  await character.connect(deployer).addHero(3);
+};
+
+const initialSetup = async () => {
+  // await setGameAdmin();
+  // await setRandomTable();
+  await addHero();
+
+  // await setEggs();
+  // await setTokenToBuyEgg();
+};
+
+const test = async () => {
+  const {
+    game: gameAddress,
+    angel: angelAddress,
+    gem: gemAddress,
+    character: characterAddress,
+  } = getAllAddresses();
+
+  const angel = (await ethers.getContractAt(
+    "AngelsCreedToken",
+    angelAddress
+  )) as AngelsCreedToken;
+
+  const gem = (await ethers.getContractAt("GemToken", gemAddress)) as GemToken;
+
+  const character = (await ethers.getContractAt(
+    "BNBHCharacter",
+    characterAddress
+  )) as BNBHCharacter;
+
+  const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
+
   // await angel.connect(deployer).approve(gameAddress, UINT_MAX);
-  // await game.connect(deployer).estimateGas.buyEgg(0, 0);
+  // await gem.connect(deployer).approve(gameAddress, UINT_MAX);
   // await game.connect(deployer).buyEgg(0, 0);
-  console.log("game addmin", await character.hasRole(GAME_ADMIN, gameAddress)
+  // await game.connect(deployer).buyEgg(1, 0);
+
+  // ---- read data
+  // console.log("game admin", await character.hasRole(GAME_ADMIN, gameAddress));
+  // console.log("tokensToCreateHero", await game.tokensToCreateHero(0));
+  // console.log("tokensToCreateHero", await game.tokensToCreateHero(1));
+  // console.log("characters", await game.characters());
+  // console.log("egg", await game.eggs(0));
+  console.log(
+    "tokenId",
+    await character.tokensOfOwner(await deployer.getAddress())
+  );
+  // console.log("stateLastTokenId", await character.stateLastTokenId());
 };
 
 const main = async () => {

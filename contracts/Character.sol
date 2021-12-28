@@ -23,15 +23,11 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
   mapping(uint256 => uint256) private _heroesIndex;
   mapping(address => uint256[]) private _ownedTokens;
   mapping(uint256 => uint256) private _ownedTokensIndex;
-  uint256 public stateLastTokenId = 1;
+  uint256 public stateLastTokenId = 0;
 
   string private baseURI;
 
   constructor() ERC721("AngelCharacter", "CHAR") {
-    HeroLibrary.Hero memory fillGapHero = HeroLibrary.Hero(0, 0, 0);
-
-    _heroes.push(fillGapHero);
-
     _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _setRoleAdmin(GAME_ADMIN, DEFAULT_ADMIN_ROLE);
   }
@@ -106,6 +102,25 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     heroTypeLength[rarity]++;
   }
 
+  function _beforeTokenTransfer(
+    address from,
+    address to,
+    uint256 tokenId
+  ) internal override {
+    super._beforeTokenTransfer(from, to, tokenId);
+
+    if (from == address(0)) {
+      _addHeroToAllHeroesEnumeration(tokenId);
+    } else if (from != to) {
+      _removeTokenFromOwnerEnumeration(from, tokenId);
+    }
+    if (to == address(0)) {
+      _removeHeroFromAllHeroesEnumeration(tokenId);
+    } else if (to != from) {
+      _addTokenToOwnerEnumeration(to, tokenId);
+    }
+  }
+
   /**
    * @dev Private function to add a token to this extension's ownership-tracking data structures.
    * @param to address representing the new owner of the given token ID
@@ -160,7 +175,7 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     _heroesIndex[lastHero.tokenId] = tokenIndex; // Update the moved token's index
 
     // This also deletes the contents at the last position of the array
-    delete _heroes[tokenId];
+    delete _heroesIndex[tokenId];
     _heroes.pop();
   }
 
@@ -181,15 +196,17 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     uint8 eggType
   ) external restricted returns (uint256) {
     uint256 heroRarity = randomTable[eggType][seed % 100];
-    // console.log("heroRarity", heroRarity);
     uint256 heroName = seed % heroTypeLength[heroRarity];
-    // console.log("heroName", heroName);
 
-    _heroes.push(HeroLibrary.Hero(stateLastTokenId, heroRarity, heroName));
     _safeMint(minter, stateLastTokenId);
+    _heroes.push(HeroLibrary.Hero(stateLastTokenId, heroRarity, heroName));
     stateLastTokenId++;
 
     return stateLastTokenId;
+  }
+
+  function burn(uint256 tokenId) external restricted {
+    _burn(tokenId);
   }
 
   function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
