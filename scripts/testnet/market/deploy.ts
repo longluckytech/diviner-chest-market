@@ -16,12 +16,12 @@ const GAME_ADMIN = ethers.utils.keccak256(
 
 const UINT_MAX = ethers.constants.MaxUint256;
 
-const randomTable = createRandomTable(55, 30, 10, 5);
-const randomTable2 = createRandomTable(45, 30, 15, 5);
-const randomTable3 = createRandomTable(20, 55, 20, 5);
-const randomTable4 = createRandomTable(10, 60, 20, 10);
-const randomTable5 = createRandomTable(0, 30, 45, 25);
-const randomTable6 = createRandomTable(0, 0, 60, 35);
+const randomTable = createRandomTable(62, 32, 5, 1);
+const randomTable2 = createRandomTable(49, 42, 7, 2);
+const randomTable3 = createRandomTable(40, 40, 16, 4);
+const randomTable4 = createRandomTable(24, 39, 28, 9);
+const randomTable5 = createRandomTable(2, 27, 49, 22);
+const randomTable6 = createRandomTable(0, 5, 55, 40);
 
 const pathToAddress = path.join(__dirname, "./address.json");
 
@@ -126,58 +126,31 @@ const setEggs = async () => {
   const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
   await game
     .connect(deployer)
-    .setEggs(0, [
-      ethers.utils.parseEther("10"),
-      ethers.utils.parseEther("100"),
-      10,
-    ]);
+    .setEggs(0, [ethers.utils.parseEther("570"), 10, 10]);
   await game
     .connect(deployer)
-    .setEggs(1, [
-      ethers.utils.parseEther("20"),
-      ethers.utils.parseEther("200"),
-      8,
-    ]);
+    .setEggs(1, [ethers.utils.parseEther("855"), 8, 8]);
   await game
     .connect(deployer)
-    .setEggs(2, [
-      ethers.utils.parseEther("30"),
-      ethers.utils.parseEther("300"),
-      5,
-    ]);
+    .setEggs(2, [ethers.utils.parseEther("1140"), 8, 8]);
   await game
     .connect(deployer)
-    .setEggs(3, [
-      ethers.utils.parseEther("40"),
-      ethers.utils.parseEther("400"),
-      3,
-    ]);
+    .setEggs(3, [ethers.utils.parseEther("2140"), 3, 3]);
   await game
     .connect(deployer)
-    .setEggs(4, [
-      ethers.utils.parseEther("50"),
-      ethers.utils.parseEther("500"),
-      3,
-    ]);
+    .setEggs(4, [ethers.utils.parseEther("4000"), 3, 3]);
 
   await game
     .connect(deployer)
-    .setEggs(5, [
-      ethers.utils.parseEther("60"),
-      ethers.utils.parseEther("600"),
-      2,
-    ]);
+    .setEggs(5, [ethers.utils.parseEther("7140"), 2, 2]);
 };
 
-const setTokenToBuyEgg = async () => {
-  const {
-    gem: gemAddress,
-    angel: angelAddress,
-    game: gameAddress,
-  } = getAllAddresses();
+const setMaxEggUserCanBuy = async () => {
+  const { game: gameAddress } = getAllAddresses();
+
   const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
 
-  await game.connect(deployer).setTokensToBuy([angelAddress, gemAddress]);
+  await game.connect(deployer).setMaxEggUserCanBuy(10);
 };
 
 const addHero = async () => {
@@ -197,19 +170,18 @@ const addHero = async () => {
 };
 
 const initialSetup = async () => {
-  // await setGameAdmin();
-  // await setRandomTable();
+  await setGameAdmin();
+  await setRandomTable();
   await addHero();
 
-  // await setEggs();
-  // await setTokenToBuyEgg();
+  await setEggs();
+  await setMaxEggUserCanBuy();
 };
 
 const test = async () => {
   const {
     game: gameAddress,
     angel: angelAddress,
-    gem: gemAddress,
     character: characterAddress,
   } = getAllAddresses();
 
@@ -218,8 +190,6 @@ const test = async () => {
     angelAddress
   )) as AngelsCreedToken;
 
-  const gem = (await ethers.getContractAt("GemToken", gemAddress)) as GemToken;
-
   const character = (await ethers.getContractAt(
     "BNBHCharacter",
     characterAddress
@@ -227,21 +197,27 @@ const test = async () => {
 
   const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
 
-  // await angel.connect(deployer).approve(gameAddress, UINT_MAX);
-  // await gem.connect(deployer).approve(gameAddress, UINT_MAX);
-  // await game.connect(deployer).buyEgg(0, 0);
+  // await angel.connect(user1).approve(gameAddress, UINT_MAX);
+  // await game.connect(deployer).buyEgg(0);
+  // await game.connect(deployer).buyEgg(1);
+  // await game.connect(deployer).buyEgg(2);
+  // await game.connect(deployer).buyEgg(3);
+  // await game.connect(deployer).buyEgg(4);
+  // for (let i = 1; i <= 2; i++) await game.connect(user1).buyEgg(5);
+
   // await game.connect(deployer).buyEgg(1, 0);
 
   // ---- read data
-  // console.log("game admin", await character.hasRole(GAME_ADMIN, gameAddress));
+  for (let i = 10; i <= 20; i++)
+    console.log("game admin", await character.getHero(i));
   // console.log("tokensToCreateHero", await game.tokensToCreateHero(0));
   // console.log("tokensToCreateHero", await game.tokensToCreateHero(1));
   // console.log("characters", await game.characters());
   // console.log("egg", await game.eggs(0));
-  console.log(
-    "tokenId",
-    await character.tokensOfOwner(await deployer.getAddress())
-  );
+  // console.log(
+  //   "tokenId",
+  //   await character.tokensOfOwner(await deployer.getAddress())
+  // );
   // console.log("stateLastTokenId", await character.stateLastTokenId());
 };
 

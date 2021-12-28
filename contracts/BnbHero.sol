@@ -20,20 +20,19 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
   IERC20 public creedToken;
 
   struct Egg {
-    uint256 gemToBuy;
     uint256 angelToBuy;
-    uint256 maxEggCanBuy;
+    uint256 remainEgg;
   }
 
-  mapping(address => uint256[6]) public users; // so luong trung da mua
+  uint8 public maxEggUserCanBuy = 10;
+
+  mapping(address => uint8) public users; // so luong trung da mua
 
   event UpdatedTokenContract(address tokenAddress);
   event UpdatedCharacterContract(address characterAddress);
   event CreatedHero(address player, uint256 _heroId);
 
   mapping(uint8 => Egg) public eggs; // egg type => max egg
-
-  address[2] public tokensToCreateHero;
 
   modifier onlyOwner() {
     require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
@@ -52,14 +51,13 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
     characters = _character;
   }
 
-  function setTokensToBuy(address[2] memory values) public onlyOwner {
-    tokensToCreateHero = values;
+  function setMaxEggUserCanBuy(uint8 value) external onlyOwner {
+    maxEggUserCanBuy = value;
   }
 
   function setEggs(uint8 eggType, uint256[] memory values) public onlyOwner {
     eggs[eggType].angelToBuy = values[0];
-    eggs[eggType].gemToBuy = values[1];
-    eggs[eggType].maxEggCanBuy = values[2];
+    eggs[eggType].remainEgg = values[1];
   }
 
   function setAngelTokenContract(address tokenAddress) public onlyOwner {
@@ -86,35 +84,26 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
       );
   }
 
-  function buyEgg(uint256 tokenIndex, uint8 eggType) external {
-    uint256 length = tokensToCreateHero.length;
-    require(tokenIndex < length, "not valid token");
+  function buyEgg(uint8 eggType) external {
     require(eggType >= 0 && eggType < 6, "Out of egg type");
     require(
-      users[msg.sender][eggType] < eggs[eggType].maxEggCanBuy,
+      users[msg.sender] < maxEggUserCanBuy,
       "you have bought the allowed egg"
     );
-    users[msg.sender][eggType]++;
+    require(eggs[eggType].remainEgg > 0, "Out of egg with type");
+    users[msg.sender]++;
 
     uint256 seed = random(msg.sender);
     uint256 heroId = characters.mint(msg.sender, seed, eggType);
 
-    uint256 price;
-
-    if (tokenIndex == 0) {
-      price = eggs[eggType].angelToBuy;
-    } else if (tokenIndex == 1) {
-      price = eggs[eggType].gemToBuy;
-    }
-
-    IERC20 token = IERC20(tokensToCreateHero[tokenIndex]);
+    uint256 price = eggs[eggType].angelToBuy;
 
     require(
-      token.balanceOf(msg.sender) >= price,
+      angelToken.balanceOf(msg.sender) >= price,
       "not enough balance create hero"
     );
 
-    token.safeTransferFrom(msg.sender, address(this), price);
+    angelToken.safeTransferFrom(msg.sender, address(this), price);
 
     emit CreatedHero(msg.sender, heroId);
   }

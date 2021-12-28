@@ -23,11 +23,15 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
   mapping(uint256 => uint256) private _heroesIndex;
   mapping(address => uint256[]) private _ownedTokens;
   mapping(uint256 => uint256) private _ownedTokensIndex;
-  uint256 public stateLastTokenId = 0;
+  uint256 public stateLastTokenId = 1;
 
   string private baseURI;
 
   constructor() ERC721("AngelCharacter", "CHAR") {
+    HeroLibrary.Hero memory fillGapHero = HeroLibrary.Hero(0, 0, 0);
+
+    _heroes.push(fillGapHero);
+
     _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _setRoleAdmin(GAME_ADMIN, DEFAULT_ADMIN_ROLE);
   }
@@ -156,7 +160,7 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
 
     // This also deletes the contents at the last position of the array
     delete _ownedTokensIndex[tokenId];
-    delete _ownedTokens[from][lastTokenIndex];
+    _ownedTokens[from].pop();
   }
 
   function _removeHeroFromAllHeroesEnumeration(uint256 tokenId) private {

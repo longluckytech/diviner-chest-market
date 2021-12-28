@@ -107,56 +107,40 @@ describe("Angles creed", function () {
       ["mint(address,uint256)"](users[1], ethers.utils.parseEther("1000000.0"));
 
     await creed.connect(signers[1]).approve(game.address, UINT_MAX);
-  });
 
-  it("Should set Tokens To Buy", async () => {
-    await game.connect(deployer).setTokensToBuy([angel.address, creed.address]);
+    await angel
+      .connect(deployer)
+      ["mint(address,uint256)"](users[2], ethers.utils.parseEther("1000000.0"));
+
+    await angel.connect(signers[2]).approve(game.address, UINT_MAX);
+
+    await creed
+      .connect(deployer)
+      ["mint(address,uint256)"](users[2], ethers.utils.parseEther("1000000.0"));
+
+    await creed.connect(signers[2]).approve(game.address, UINT_MAX);
   });
 
   it("Should set eggs", async () => {
     await game
       .connect(deployer)
-      .setEggs(0, [
-        ethers.utils.parseEther("100"),
-        ethers.utils.parseEther("500"),
-        10,
-      ]);
+      .setEggs(0, [ethers.utils.parseEther("100"), 10, 10]);
     await game
       .connect(deployer)
-      .setEggs(1, [
-        ethers.utils.parseEther("100"),
-        ethers.utils.parseEther("500"),
-        8,
-      ]);
+      .setEggs(1, [ethers.utils.parseEther("100"), 8, 8]);
     await game
       .connect(deployer)
-      .setEggs(2, [
-        ethers.utils.parseEther("100"),
-        ethers.utils.parseEther("500"),
-        5,
-      ]);
+      .setEggs(2, [ethers.utils.parseEther("100"), 8, 8]);
     await game
       .connect(deployer)
-      .setEggs(3, [
-        ethers.utils.parseEther("100"),
-        ethers.utils.parseEther("500"),
-        3,
-      ]);
+      .setEggs(3, [ethers.utils.parseEther("100"), 3, 3]);
     await game
       .connect(deployer)
-      .setEggs(4, [
-        ethers.utils.parseEther("100"),
-        ethers.utils.parseEther("500"),
-        3,
-      ]);
+      .setEggs(4, [ethers.utils.parseEther("100"), 3, 3]);
 
     await game
       .connect(deployer)
-      .setEggs(5, [
-        ethers.utils.parseEther("100"),
-        ethers.utils.parseEther("500"),
-        2,
-      ]);
+      .setEggs(5, [ethers.utils.parseEther("100"), 2, 1]);
   });
   it("Should add heros", async () => {
     await character.connect(deployer).addHero(0);
@@ -170,22 +154,58 @@ describe("Angles creed", function () {
   it("Should buy eggs", async () => {
     // User 1 : 1,3,4
     // User 2 : 2
-    await game.connect(signers[1]).buyEgg(0, 5);
-    await game.connect(signers[1]).buyEgg(1, 5);
-    await expect(game.connect(signers[1]).buyEgg(0, 5)).to.be.reverted;
-    // console.log("tokenIds", await character.tokensOfOwner(users[1]));
-    // console.log("tokenIds", await character.tokenOfOwnerByIndex(users[1], 0));
+    for (let i = 0; i < 10; i++) await game.connect(signers[1]).buyEgg(5);
+    await expect(game.connect(signers[1]).buyEgg(5)).to.be.reverted;
   });
   it("Should burn with game admin", async () => {
     const tokenIds1 = await character.tokensOfOwner(users[1]);
     console.log("tokenIds1", tokenIds1);
 
-    await character.connect(deployer).burn(tokenIds1[0].toString());
+    await character.connect(deployer).burn(tokenIds1[2].toString());
     const tokenIds2 = await character.tokensOfOwner(users[1]);
     console.log("tokenIds2", tokenIds2);
 
-    // expect((await character.tokensOfOwner(users[1])).length).equal(
-    //   tokenIds.length - 1
-    // );
+    expect((await character.tokensOfOwner(users[1])).length).equal(
+      tokenIds1.length - 1
+    );
   });
+
+  // it("Should buy egg with user 2", async () => {
+  //   await game.connect(signers[2]).buyEgg(0);
+  //   await game.connect(signers[2]).buyEgg(0);
+
+  //   const tokenIds1 = await character.tokensOfOwner(users[2]);
+  //   console.log("tokenIds1", tokenIds1);
+  // });
+  // it("Should buy egg with user 1", async () => {
+  //   await game.connect(signers[1]).buyEgg(0);
+  //   await game.connect(signers[1]).buyEgg(0);
+
+  //   const tokenIds1 = await character.tokensOfOwner(users[1]);
+  //   console.log("tokenIds1", tokenIds1);
+  // });
+
+  // it("Should burn user 1 in 3", async () => {
+  //   const tokenIds1 = await character.tokensOfOwner(users[1]);
+
+  //   await character.connect(deployer).burn(tokenIds1[3].toString());
+  //   const tokenIds2 = await character.tokensOfOwner(users[1]);
+  //   console.log("tokenIds2", tokenIds2);
+
+  //   expect((await character.tokensOfOwner(users[1])).length).equal(
+  //     tokenIds1.length - 1
+  //   );
+  // });
+
+  // it("Should burn user 2 in 1", async () => {
+  //   const tokenIds1 = await character.tokensOfOwner(users[2]);
+
+  //   await character.connect(deployer).burn(tokenIds1[1].toString());
+  //   const tokenIds2 = await character.tokensOfOwner(users[2]);
+  //   console.log("tokenIds2", tokenIds2);
+
+  //   expect((await character.tokensOfOwner(users[2])).length).equal(
+  //     tokenIds1.length - 1
+  //   );
+  // });
 });
