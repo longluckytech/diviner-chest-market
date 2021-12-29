@@ -66,6 +66,14 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     randomTable[eggType] = values;
   }
 
+  function getRandomTableWithEggType(uint8 eggType)
+    external
+    view
+    returns (uint8[] memory)
+  {
+    return randomTable[eggType];
+  }
+
   function tokensOfOwner(address owner)
     external
     view
@@ -188,7 +196,8 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     view
     returns (HeroLibrary.Hero memory)
   {
-    require(_heroId < _heroes.length, "Does not exist hero");
+    uint256 tokenIndex = _heroesIndex[_heroId];
+    require(tokenIndex != 0, "Does not exist hero");
     HeroLibrary.Hero memory hero = _heroes[_heroId];
 
     return hero;

@@ -126,23 +126,22 @@ const setEggs = async () => {
   const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
   await game
     .connect(deployer)
-    .setEggs(0, [ethers.utils.parseEther("570"), 10, 10]);
+    .setEggs(0, [ethers.utils.parseEther("570"), 3000]);
   await game
     .connect(deployer)
-    .setEggs(1, [ethers.utils.parseEther("855"), 8, 8]);
+    .setEggs(1, [ethers.utils.parseEther("855"), 1500]);
   await game
     .connect(deployer)
-    .setEggs(2, [ethers.utils.parseEther("1140"), 8, 8]);
+    .setEggs(2, [ethers.utils.parseEther("1140"), 1200]);
   await game
     .connect(deployer)
-    .setEggs(3, [ethers.utils.parseEther("2140"), 3, 3]);
+    .setEggs(3, [ethers.utils.parseEther("2140"), 300]);
   await game
     .connect(deployer)
-    .setEggs(4, [ethers.utils.parseEther("4000"), 3, 3]);
-
+    .setEggs(4, [ethers.utils.parseEther("4000"), 150]);
   await game
     .connect(deployer)
-    .setEggs(5, [ethers.utils.parseEther("7140"), 2, 2]);
+    .setEggs(5, [ethers.utils.parseEther("7140"), 40]);
 };
 
 const setMaxEggUserCanBuy = async () => {
@@ -175,7 +174,7 @@ const initialSetup = async () => {
   await addHero();
 
   await setEggs();
-  await setMaxEggUserCanBuy();
+  // await setMaxEggUserCanBuy();
 };
 
 const test = async () => {
@@ -206,10 +205,12 @@ const test = async () => {
   // for (let i = 1; i <= 2; i++) await game.connect(user1).buyEgg(5);
 
   // await game.connect(deployer).buyEgg(1, 0);
+  // console.log("await user1.getAddress()", await user1.getAddress());
+  // await character.connect(deployer).burn(3);
 
   // ---- read data
-  for (let i = 10; i <= 20; i++)
-    console.log("game admin", await character.getHero(i));
+  // for (let i = 10; i <= 20; i++)
+  //   console.log("game admin", await character.getHero(i));
   // console.log("tokensToCreateHero", await game.tokensToCreateHero(0));
   // console.log("tokensToCreateHero", await game.tokensToCreateHero(1));
   // console.log("characters", await game.characters());
@@ -234,9 +235,9 @@ const main = async () => {
   // await deployCharacter();
   // await deployGame();
 
-  // await initialSetup();
+  await initialSetup();
 
-  await test();
+  // await test();
 };
 
 // We recommend this pattern to be able to use async/await everywhere

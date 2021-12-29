@@ -25,14 +25,14 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
   }
 
   uint8 public maxEggUserCanBuy = 10;
+  address marketingAddress = 0x347871AE7f6DE43b18E2F72d6FAd0191527B96d5;
 
   mapping(address => uint8) public users; // so luong trung da mua
+  mapping(uint8 => Egg) public eggs; // egg type => max egg
 
   event UpdatedTokenContract(address tokenAddress);
   event UpdatedCharacterContract(address characterAddress);
   event CreatedHero(address player, uint256 _heroId);
-
-  mapping(uint8 => Egg) public eggs; // egg type => max egg
 
   modifier onlyOwner() {
     require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
@@ -55,19 +55,23 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
     maxEggUserCanBuy = value;
   }
 
-  function setEggs(uint8 eggType, uint256[] memory values) public onlyOwner {
+  function setEggs(uint8 eggType, uint256[] memory values) external onlyOwner {
     eggs[eggType].angelToBuy = values[0];
     eggs[eggType].remainEgg = values[1];
   }
 
-  function setAngelTokenContract(address tokenAddress) public onlyOwner {
+  function setAngelTokenContract(address tokenAddress) external onlyOwner {
     angelToken = IERC20(tokenAddress);
     emit UpdatedTokenContract(tokenAddress);
   }
 
-  function setCharacterContract(address characterAddress) public onlyOwner {
+  function setCharacterContract(address characterAddress) external onlyOwner {
     characters = IBNBHCharacter(characterAddress);
     emit UpdatedCharacterContract(characterAddress);
+  }
+
+  function setmarketingAddress(address _marketingAddress) external onlyOwner {
+    marketingAddress = _marketingAddress;
   }
 
   function random(address user) internal view returns (uint256) {
@@ -92,6 +96,7 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
     );
     require(eggs[eggType].remainEgg > 0, "Out of egg with type");
     users[msg.sender]++;
+    eggs[eggType].remainEgg--;
 
     uint256 seed = random(msg.sender);
     uint256 heroId = characters.mint(msg.sender, seed, eggType);
@@ -133,5 +138,12 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
     return size > 0;
   }
 
-  function emergencyWithdraw() external onlyOwner {}
+  function marketing(address token) external onlyOwner {
+    IERC20 tokenInstance = IERC20(token);
+
+    tokenInstance.safeTransfer(
+      marketingAddress,
+      tokenInstance.balanceOf(address(this))
+    );
+  }
 }
