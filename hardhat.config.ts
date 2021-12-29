@@ -91,6 +91,12 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY_USER2!,
       ],
     },
+    hardhat: {
+      forking: {
+        url: "https://speedy-nodes-nyc.moralis.io/5ba923ae20cc2c0509504eaa/bsc/testnet/archive",
+        blockNumber: 13637023,
+      },
+    },
   },
 
   gasReporter: {

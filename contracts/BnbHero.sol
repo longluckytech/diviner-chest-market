@@ -75,6 +75,7 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
   }
 
   function random(address user) internal view returns (uint256) {
+    console.log("block.timestamp", block.timestamp);
     return
       uint256(
         keccak256(

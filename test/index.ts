@@ -10,6 +10,7 @@ import {
   GemToken,
 } from "../typechain";
 import { createRandomTable } from "./../config/wiki";
+const SECOND_IN_MONTH = 3;
 
 const batchTxsToBlock = async (callback: any) => {
   await network.provider.send("evm_setAutomine", [false]);
@@ -150,6 +151,13 @@ describe("Angles creed", function () {
     await character.connect(deployer).addHero(3);
     await character.connect(deployer).addHero(3);
   });
+  it("It should NOT be claim during cliff - a month passed", async function () {
+    for (let i = 0; i < 5; i++) {
+      await network.provider.send("evm_increaseTime", [SECOND_IN_MONTH]);
+      await network.provider.send("evm_mine");
+      await game.connect(signers[2]).buyEgg(0);
+    }
+  });
 
   // it("Should buy eggs", async () => {
   //   // User 1 : 1,3,4
@@ -213,8 +221,4 @@ describe("Angles creed", function () {
   //   await game.connect(signers[1]).buyEgg(5);
   //   await expect(game.connect(signers[1]).buyEgg(5)).to.be.reverted;
   // });
-
-  it("Should get egg", async () => {
-    console.log(await character.getRandomTableWithEggType(0));
-  });
 });
