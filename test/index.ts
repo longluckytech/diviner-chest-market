@@ -152,11 +152,13 @@ describe("Angles creed", function () {
     await character.connect(deployer).addHero(3);
   });
   it("It should NOT be claim during cliff - a month passed", async function () {
-    for (let i = 0; i < 5; i++) {
-      await network.provider.send("evm_increaseTime", [SECOND_IN_MONTH]);
-      await network.provider.send("evm_mine");
-      await game.connect(signers[2]).buyEgg(0);
-    }
+    // for (let i = 0; i < 5; i++) {
+    //   await network.provider.send("evm_increaseTime", [SECOND_IN_MONTH]);
+    //   await network.provider.send("evm_mine");
+    const tx = await game.connect(signers[2]).buyEgg(0);
+    const result = await tx.wait();
+    console.log("result", result);
+    // }
   });
 
   // it("Should buy eggs", async () => {

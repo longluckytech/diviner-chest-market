@@ -11,7 +11,13 @@ interface IBNBHCharacter is IERC721Enumerable {
     address minter,
     uint256 seed,
     uint8 eggType
-  ) external returns (uint256);
+  )
+    external
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
 
   function getHero(uint256 _heroId)
     external

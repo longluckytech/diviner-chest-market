@@ -66,6 +66,10 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     randomTable[eggType] = values;
   }
 
+  function setHeroTypeLength(uint8 heroType, uint8 _value) external onlyOwner {
+    heroTypeLength[heroType] = _value;
+  }
+
   function getRandomTableWithEggType(uint8 eggType)
     external
     view
@@ -207,7 +211,15 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     address minter,
     uint256 seed,
     uint8 eggType
-  ) external restricted returns (uint256) {
+  )
+    external
+    restricted
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
     uint256 heroRarity = randomTable[eggType][seed % 100];
     uint256 heroName = seed % heroTypeLength[heroRarity];
 
@@ -215,7 +227,7 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     _heroes.push(HeroLibrary.Hero(stateLastTokenId, heroRarity, heroName));
     stateLastTokenId++;
 
-    return stateLastTokenId;
+    return (stateLastTokenId, heroRarity, heroName);
   }
 
   function burn(uint256 tokenId) external restricted {

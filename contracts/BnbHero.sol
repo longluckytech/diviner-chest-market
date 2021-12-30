@@ -32,7 +32,12 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
 
   event UpdatedTokenContract(address tokenAddress);
   event UpdatedCharacterContract(address characterAddress);
-  event CreatedHero(address player, uint256 _heroId);
+  event CreatedHero(
+    address player,
+    uint256 _heroId,
+    uint256 heroRarity,
+    uint256 heroName
+  );
 
   modifier onlyOwner() {
     require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
@@ -89,7 +94,14 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
       );
   }
 
-  function buyEgg(uint8 eggType) external {
+  function buyEgg(uint8 eggType)
+    external
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
     require(eggType >= 0 && eggType < 6, "Out of egg type");
     require(
       users[msg.sender] < maxEggUserCanBuy,
@@ -100,7 +112,11 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
     eggs[eggType].remainEgg--;
 
     uint256 seed = random(msg.sender);
-    uint256 heroId = characters.mint(msg.sender, seed, eggType);
+    (uint256 heroId, uint256 heroRarity, uint256 heroName) = characters.mint(
+      msg.sender,
+      seed,
+      eggType
+    );
 
     uint256 price = eggs[eggType].angelToBuy;
 
@@ -111,7 +127,8 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
 
     angelToken.safeTransferFrom(msg.sender, address(this), price);
 
-    emit CreatedHero(msg.sender, heroId);
+    emit CreatedHero(msg.sender, heroId, heroRarity, heroName);
+    return (heroId, heroRarity, heroName);
   }
 
   function payForOperation(address payer, uint256 amount) internal {
