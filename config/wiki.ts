@@ -20,18 +20,18 @@ export const createRandomTable = (
   ssr: number
 ) => {
   if (n + r + sr + ssr !== 100) throw new Error("error");
-  const randomTable: BigNumber[] = [];
+  const randomTable: number[] = [];
   for (let i = 0; i < n; i++) {
-    randomTable.push(BigNumber.from(0));
+    randomTable.push(0);
   }
   for (let i = 0; i < r; i++) {
-    randomTable.push(BigNumber.from(1));
+    randomTable.push(1);
   }
   for (let i = 0; i < sr; i++) {
-    randomTable.push(BigNumber.from(2));
+    randomTable.push(2);
   }
   for (let i = 0; i < ssr; i++) {
-    randomTable.push(BigNumber.from(3));
+    randomTable.push(3);
   }
 
   return randomTable;

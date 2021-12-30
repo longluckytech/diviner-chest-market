@@ -196,24 +196,25 @@ const test = async () => {
 
   const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
 
-  // await angel.connect(user1).approve(gameAddress, UINT_MAX);
-  // await game.connect(deployer).buyEgg(0);
-  // await game.connect(deployer).buyEgg(1);
-  // await game.connect(deployer).buyEgg(2);
-  // await game.connect(deployer).buyEgg(3);
-  // await game.connect(deployer).buyEgg(4);
-  // for (let i = 1; i <= 2; i++) await game.connect(user1).buyEgg(5);
-
-  // await game.connect(deployer).buyEgg(1, 0);
-  // console.log("await user1.getAddress()", await user1.getAddress());
   // await game
   //   .connect(deployer)
   //   .marketing("0x965919bCb51cCE4FeB5aE062f710226037738e00");
+
+  await character.connect(deployer).burn(73);
+
   // await character
   //   .connect(deployer)
-  //   .approve("0xEe2950FbF5C41ed99AFD7365E8561340cA991c0d", 2);
+  //   .grantRole(GAME_ADMIN, "0x0c5aa3f44250ab17c0cb90b2717e727df2ae66b2");
 
-  // await character.connect(deployer).burn(40);
+  // await character.connect(deployer).mint(await deployer.getAddress(), 98, 5);
+
+  // await character
+  //   .connect(deployer)
+  //   .transferFrom(
+  //     await deployer.getAddress(),
+  //     "0x347871AE7f6DE43b18E2F72d6FAd0191527B96d5",
+  //     65
+  //   );
 
   // ---- read data
   // for (let i = 10; i <= 20; i++)
@@ -242,9 +243,9 @@ const main = async () => {
   // await deployCharacter();
   // await deployGame();
 
-  await initialSetup();
+  // await initialSetup();
 
-  // await test();
+  await test();
 };
 
 // We recommend this pattern to be able to use async/await everywhere

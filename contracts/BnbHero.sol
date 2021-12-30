@@ -24,10 +24,10 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
     uint256 remainEgg;
   }
 
-  uint8 public maxEggUserCanBuy = 10;
+  uint256 public maxEggUserCanBuy = 10;
   address marketingAddress = 0x347871AE7f6DE43b18E2F72d6FAd0191527B96d5;
 
-  mapping(address => uint8) public users; // so luong trung da mua
+  mapping(address => uint256) public users; // so luong trung da mua
   mapping(uint8 => Egg) public eggs; // egg type => max egg
 
   event UpdatedTokenContract(address tokenAddress);
@@ -56,7 +56,7 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
     characters = _character;
   }
 
-  function setMaxEggUserCanBuy(uint8 value) external onlyOwner {
+  function setMaxEggUserCanBuy(uint256 value) external onlyOwner {
     maxEggUserCanBuy = value;
   }
 
@@ -80,7 +80,6 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
   }
 
   function random(address user) internal view returns (uint256) {
-    console.log("block.timestamp", block.timestamp);
     return
       uint256(
         keccak256(

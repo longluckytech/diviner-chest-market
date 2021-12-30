@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { Signer, BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
+import { text } from "node:stream/consumers";
 import { addressTestnet } from "../config/address";
 import { priceToFight } from "../config/wiki";
 import {
@@ -10,7 +11,7 @@ import {
   GemToken,
 } from "../typechain";
 import { createRandomTable } from "./../config/wiki";
-const SECOND_IN_MONTH = 3;
+const SECOND_IN_MONTH = 4;
 
 const batchTxsToBlock = async (callback: any) => {
   await network.provider.send("evm_setAutomine", [false]);
@@ -84,16 +85,16 @@ describe("Angles creed", function () {
       .setRandomTableWithEggType(1, randomTable2);
     await character
       .connect(deployer)
-      .setRandomTableWithEggType(2, randomTable6);
+      .setRandomTableWithEggType(2, randomTable3);
     await character
       .connect(deployer)
-      .setRandomTableWithEggType(3, randomTable3);
+      .setRandomTableWithEggType(3, randomTable4);
     await character
       .connect(deployer)
-      .setRandomTableWithEggType(4, randomTable4);
+      .setRandomTableWithEggType(4, randomTable5);
     await character
       .connect(deployer)
-      .setRandomTableWithEggType(5, randomTable5);
+      .setRandomTableWithEggType(5, randomTable6);
   });
 
   it("mint angel, creed", async () => {
@@ -159,22 +160,31 @@ describe("Angles creed", function () {
   it("Should buy eggs", async () => {
     // User 1 : 1,3,4
     // User 2 : 2
-    for (let i = 0; i < 6000; i++) {
+    const hero = [];
+    for (let i = 0; i < 300; i++) {
       await network.provider.send("evm_increaseTime", [SECOND_IN_MONTH]);
       await network.provider.send("evm_mine");
-      await game.connect(signers[1]).buyEgg(5);
+      const tx = await game.connect(signers[1]).buyEgg(0);
+      const result: any = await tx?.wait();
+      if (result.events[3].args.heroRarity.toString() === "0")
+        hero.push(result.events[3].args.heroName.toString());
     }
-
-    const tokenIds1 = await character.tokensOfOwner(users[1]);
-    for (let i = 0; i < 4; i++) {
-      const amount = tokenIds1.reduce((prev, cur) => {
-        if (cur.toString() === i.toString()) return ++prev;
+    const rate = [];
+    let total = 0;
+    for (let i = 0; i < 2; i++) {
+      const amount = hero.reduce((prev, cur) => {
+        if (cur === i.toString()) return ++prev;
         return prev;
       }, 0);
-      console.log("i", i);
-      console.log("amount", amount);
+      rate.push(amount);
+      total += amount;
+      console.log(`amount ${i} ${amount}`);
     }
+    // rate.forEach((r, index) => {
+    //   console.log(`rate ${index} ${(r / total) * 100}`);
+    // });
   });
+
   // it("Should burn with game admin", async () => {
   //   const tokenIds1 = await character.tokensOfOwner(users[1]);
   //   console.log("tokenIds1", tokenIds1);
