@@ -202,7 +202,7 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
   {
     uint256 tokenIndex = _heroesIndex[_heroId];
     require(tokenIndex != 0, "Does not exist hero");
-    HeroLibrary.Hero memory hero = _heroes[_heroId];
+    HeroLibrary.Hero memory hero = _heroes[tokenIndex];
 
     return hero;
   }

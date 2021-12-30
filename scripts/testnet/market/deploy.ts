@@ -17,11 +17,11 @@ const GAME_ADMIN = ethers.utils.keccak256(
 const UINT_MAX = ethers.constants.MaxUint256;
 
 const randomTable = createRandomTable(62, 32, 5, 1);
-const randomTable2 = createRandomTable(49, 42, 7, 2);
-const randomTable3 = createRandomTable(40, 40, 16, 4);
-const randomTable4 = createRandomTable(24, 39, 28, 9);
-const randomTable5 = createRandomTable(2, 27, 49, 22);
-const randomTable6 = createRandomTable(0, 5, 55, 40);
+const randomTable2 = createRandomTable(49, 43, 7, 1);
+const randomTable3 = createRandomTable(40, 42, 16, 2);
+const randomTable4 = createRandomTable(24, 43, 28, 5);
+const randomTable5 = createRandomTable(2, 37, 49, 12);
+const randomTable6 = createRandomTable(0, 10, 60, 30);
 
 const pathToAddress = path.join(__dirname, "./address.json");
 
@@ -206,7 +206,14 @@ const test = async () => {
 
   // await game.connect(deployer).buyEgg(1, 0);
   // console.log("await user1.getAddress()", await user1.getAddress());
-  // await character.connect(deployer).burn(3);
+  // await game
+  //   .connect(deployer)
+  //   .marketing("0x965919bCb51cCE4FeB5aE062f710226037738e00");
+  // await character
+  //   .connect(deployer)
+  //   .approve("0xEe2950FbF5C41ed99AFD7365E8561340cA991c0d", 2);
+
+  // await character.connect(deployer).burn(40);
 
   // ---- read data
   // for (let i = 10; i <= 20; i++)

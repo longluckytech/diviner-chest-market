@@ -19,6 +19,7 @@ export const createRandomTable = (
   sr: number,
   ssr: number
 ) => {
+  if (n + r + sr + ssr !== 100) throw new Error("error");
   const randomTable: BigNumber[] = [];
   for (let i = 0; i < n; i++) {
     randomTable.push(BigNumber.from(0));
