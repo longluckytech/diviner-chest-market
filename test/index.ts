@@ -22,12 +22,12 @@ const batchTxsToBlock = async (callback: any) => {
   await network.provider.send("evm_setAutomine", [true]);
 };
 
-const randomTable = createRandomTable(62, 32, 5, 1);
-const randomTable2 = createRandomTable(49, 43, 7, 1);
-const randomTable3 = createRandomTable(40, 42, 16, 2);
-const randomTable4 = createRandomTable(24, 43, 28, 5);
-const randomTable5 = createRandomTable(2, 37, 49, 12);
-const randomTable6 = createRandomTable(0, 10, 60, 30);
+// const randomTable = createRandomTable(62, 32, 5, 1);
+// const randomTable2 = createRandomTable(49, 43, 7, 1);
+// const randomTable3 = createRandomTable(40, 42, 16, 2);
+const randomTable4 = createRandomTable(50, 40, 9, 1);
+const randomTable5 = createRandomTable(42, 38, 15, 5);
+const randomTable6 = createRandomTable(20, 44, 28, 8);
 
 let signers: Signer[];
 let game: BNBHero;
@@ -79,13 +79,13 @@ describe("Angles creed", function () {
   });
 
   it("set random table", async () => {
-    await character.connect(deployer).setRandomTableWithEggType(0, randomTable);
-    await character
-      .connect(deployer)
-      .setRandomTableWithEggType(1, randomTable2);
-    await character
-      .connect(deployer)
-      .setRandomTableWithEggType(2, randomTable3);
+    // await character.connect(deployer).setRandomTableWithEggType(0, randomTable);
+    // await character
+    //   .connect(deployer)
+    //   .setRandomTableWithEggType(1, randomTable2);
+    // await character
+    //   .connect(deployer)
+    //   .setRandomTableWithEggType(2, randomTable3);
     await character
       .connect(deployer)
       .setRandomTableWithEggType(3, randomTable4);
@@ -145,12 +145,16 @@ describe("Angles creed", function () {
       .setEggs(5, [ethers.utils.parseEther("100"), 10000]);
   });
   it("Should add heros", async () => {
-    await character.connect(deployer).addHero(0);
-    await character.connect(deployer).addHero(0);
-    await character.connect(deployer).addHero(1);
-    await character.connect(deployer).addHero(2);
-    await character.connect(deployer).addHero(3);
-    await character.connect(deployer).addHero(3);
+    // await character.connect(deployer).addHero(0);
+    // await character.connect(deployer).addHero(0);
+    // await character.connect(deployer).addHero(1);
+    // await character.connect(deployer).addHero(2);
+    // await character.connect(deployer).addHero(3);
+    // await character.connect(deployer).addHero(3);
+    (await character.connect(deployer).setHeroTypeLength(0, 2)).wait();
+    (await character.connect(deployer).setHeroTypeLength(1, 1)).wait();
+    (await character.connect(deployer).setHeroTypeLength(2, 1)).wait();
+    (await character.connect(deployer).setHeroTypeLength(3, 2)).wait();
   });
 
   it("Should sett max egg each user", async function () {
@@ -164,7 +168,7 @@ describe("Angles creed", function () {
     for (let i = 0; i < 300; i++) {
       await network.provider.send("evm_increaseTime", [SECOND_IN_MONTH]);
       await network.provider.send("evm_mine");
-      const tx = await game.connect(signers[1]).buyEgg(0);
+      const tx = await game.connect(signers[1]).buyEgg(3);
       const result: any = await tx?.wait();
       if (result.events[3].args.heroRarity.toString() === "0")
         hero.push(result.events[3].args.heroName.toString());

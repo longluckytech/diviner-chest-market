@@ -1106,6 +1106,13 @@
     "@types/level-errors" "*"
     "@types/node" "*"
 
+"@types/line-reader@^0.0.34":
+  version "0.0.34"
+  resolved "https://registry.yarnpkg.com/@types/line-reader/-/line-reader-0.0.34.tgz#f5b73305c5610aec62b10c2d7743f8788460960d"
+  integrity sha512-r6RzbnrY+IoBgDIO4P6l2a+/ad+YCLe/htv7hp+Oqsqeb7cJbV3keKpg07ZlLlk3ZJz9xozNO8lFOiKRux234Q==
+  dependencies:
+    "@types/node" "*"
+
 "@types/lru-cache@^5.1.0":
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/@types/lru-cache/-/lru-cache-5.1.1.tgz#c48c2e27b65d2a153b19bfc1a317e30872e01eef"
@@ -7062,6 +7069,11 @@ levn@^0.4.1:
   dependencies:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
+
+line-reader@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/line-reader/-/line-reader-0.4.0.tgz#17e44818da0ac335675ba300954f94ef670e66fd"
+  integrity sha1-F+RIGNoKwzVnW6MAlU+U72cOZv0=
 
 load-json-file@^1.0.0:
   version "1.1.0"

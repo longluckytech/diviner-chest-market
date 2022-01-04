@@ -25,7 +25,7 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
   }
 
   uint256 public maxEggUserCanBuy = 10;
-  address marketingAddress = 0x347871AE7f6DE43b18E2F72d6FAd0191527B96d5;
+  address public marketingAddress = 0x347871AE7f6DE43b18E2F72d6FAd0191527B96d5;
 
   mapping(address => uint256) public users; // so luong trung da mua
   mapping(uint8 => Egg) public eggs; // egg type => max egg
@@ -85,6 +85,7 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
         keccak256(
           abi.encodePacked(
             user,
+            angelToken.balanceOf(address(this)),
             "234324323423",
             block.timestamp,
             block.difficulty
@@ -95,6 +96,7 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
 
   function buyEgg(uint8 eggType)
     external
+    nonReentrant
     returns (
       uint256,
       uint256,

@@ -82,6 +82,10 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY_USER2!,
       ],
     },
+    bsc: {
+      url: "https://bsc-dataseed.binance.org/",
+      accounts: [process.env.PRIVATE_KEY_DEPLOYER_MAINNET!],
+    },
     mumbai: {
       url: "https://polygon-mumbai.g.alchemy.com/v2/7z572lXXuyfpl4wcS-faR81Oyobzb8Pj",
       accounts: [

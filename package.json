@@ -38,7 +38,9 @@
     "@nomiclabs/hardhat-solpp": "^2.0.0",
     "@openzeppelin/contracts": "^4.4.0",
     "@openzeppelin/contracts-upgradeable": "^4.4.0",
+    "@types/line-reader": "^0.0.34",
     "hardhat-tracer": "^1.0.0-alpha.6",
+    "line-reader": "^0.4.0",
     "xlsx": "^0.17.4"
   }
 }
