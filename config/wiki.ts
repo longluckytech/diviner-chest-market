@@ -17,9 +17,10 @@ export const createRandomTable = (
   n: number,
   r: number,
   sr: number,
-  ssr: number
+  ssr: number,
+  sssr: number
 ) => {
-  if (n + r + sr + ssr !== 100) throw new Error("error");
+  if (n + r + sr + ssr + sssr !== 100) throw new Error("error");
   const randomTable: number[] = [];
   for (let i = 0; i < n; i++) {
     randomTable.push(0);
@@ -31,6 +32,10 @@ export const createRandomTable = (
     randomTable.push(2);
   }
   for (let i = 0; i < ssr; i++) {
+    randomTable.push(3);
+  }
+
+  for (let i = 0; i < sssr; i++) {
     randomTable.push(3);
   }
 

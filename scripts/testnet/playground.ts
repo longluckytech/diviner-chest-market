@@ -15,8 +15,8 @@ import {
   ChainlinkRandoms,
   BNBHPriceOracle,
   AngelCreedEquipment,
-  BNBHCharacter,
-  BNBHero,
+  Civilian,
+  ChestMarket,
 } from "../../typechain";
 
 const UINT_MAX = ethers.constants.MaxUint256;
@@ -60,8 +60,8 @@ let angel: AngelsCreedToken,
   random: ChainlinkRandoms,
   oracle: BNBHPriceOracle,
   equipment: AngelCreedEquipment,
-  character: BNBHCharacter,
-  game: BNBHero;
+  character: Civilian,
+  game: ChestMarket;
 
 const setGameAdmin = async () => {
   await character.connect(deployer).setGameAdmin(game.address, {
@@ -275,8 +275,8 @@ async function main() {
     "AngelCreedEquipment",
     equipmentAddress
   );
-  character = await ethers.getContractAt("BNBHCharacter", characterAddress);
-  game = await ethers.getContractAt("BNBHero", gameAddress);
+  character = await ethers.getContractAt("Civilian", characterAddress);
+  game = await ethers.getContractAt("ChestMarket", gameAddress);
 
   console.log("Attach contract");
 

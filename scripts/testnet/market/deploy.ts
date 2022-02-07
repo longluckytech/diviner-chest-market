@@ -4,8 +4,8 @@ import lineReader from "line-reader";
 import { ethers } from "hardhat";
 import path from "path";
 import {
-  BNBHero,
-  BNBHCharacter,
+  ChestMarket,
+  Civilian,
   AngelsCreedToken,
   GemToken,
 } from "../../../typechain";
@@ -17,12 +17,12 @@ const GAME_ADMIN = ethers.utils.keccak256(
 
 const UINT_MAX = ethers.constants.MaxUint256;
 
-// const randomTable = createRandomTable(62, 32, 5, 1);
-// const randomTable2 = createRandomTable(49, 43, 7, 1);
-// const randomTable3 = createRandomTable(40, 42, 16, 2);
-const randomTable4 = createRandomTable(50, 40, 9, 1);
-const randomTable5 = createRandomTable(42, 38, 15, 5);
-const randomTable6 = createRandomTable(20, 44, 28, 8);
+const randomTable = createRandomTable(42, 31, 20, 6, 1);
+const randomTable2 = createRandomTable(15, 20, 35, 22, 8);
+const randomTable3 = createRandomTable(0, 10, 30, 35, 25);
+// const randomTable4 = createRandomTable(50, 40, 9, 1);
+// const randomTable5 = createRandomTable(42, 36, 17, 5);
+// const randomTable6 = createRandomTable(20, 39, 30, 11);
 
 const pathToAddress = path.join(__dirname, "./address.json");
 
@@ -56,13 +56,13 @@ let [deployer, admin, user1, user2]: Signer[] = [];
 let nonceOffset: number = 0;
 let baseNonce: number;
 
-const deployAngel = async () => {
+const deployDpt = async () => {
   const Angel = await ethers.getContractFactory("AngelsCreedToken");
   const angel = await Angel.connect(deployer).deploy({
     nonce: baseNonce + nonceOffset++,
   });
 
-  setAddress("angel", angel.address);
+  setAddress("dpt", angel.address);
 };
 
 const deployGem = async () => {
@@ -75,7 +75,7 @@ const deployGem = async () => {
 };
 
 const deployCharacter = async () => {
-  const Character = await ethers.getContractFactory("BNBHCharacter");
+  const Character = await ethers.getContractFactory("Civilian");
   const character = await Character.connect(deployer).deploy({
     nonce: baseNonce + nonceOffset++,
   });
@@ -84,10 +84,10 @@ const deployCharacter = async () => {
 };
 
 const deployGame = async () => {
-  const { angel, gem, character } = getAllAddresses();
+  const { dpt, gem, character } = getAllAddresses();
 
-  const Game = await ethers.getContractFactory("BNBHero");
-  const game = await Game.connect(deployer).deploy(angel, gem, character, {
+  const Game = await ethers.getContractFactory("ChestMarket");
+  const game = await Game.connect(deployer).deploy(dpt, character, {
     nonce: baseNonce + nonceOffset++,
   });
 
@@ -98,9 +98,9 @@ const setGameAdmin = async () => {
   const { character: characterAddress, game: gameAddress } = getAllAddresses();
 
   const character = (await ethers.getContractAt(
-    "BNBHCharacter",
+    "Civilian",
     characterAddress
-  )) as BNBHCharacter;
+  )) as Civilian;
 
   await character.connect(deployer).setGameAdmin(gameAddress);
   await character.connect(deployer).setGameAdmin(await deployer.getAddress());
@@ -112,127 +112,139 @@ const setRandomTable = async () => {
   const { character: characterAddress } = getAllAddresses();
 
   const character = (await ethers.getContractAt(
-    "BNBHCharacter",
+    "Civilian",
     characterAddress
-  )) as BNBHCharacter;
-  // await (
-  //   await character.connect(deployer).setRandomTableWithEggType(0, randomTable)
-  // ).wait();
-  // await (
-  //   await character.connect(deployer).setRandomTableWithEggType(1, randomTable2)
-  // ).wait();
-  // await (
-  //   await character.connect(deployer).setRandomTableWithEggType(2, randomTable3)
-  // ).wait();
+  )) as Civilian;
   await (
-    await character.connect(deployer).setRandomTableWithEggType(3, randomTable4)
+    await character
+      .connect(deployer)
+      .setRandomTableWithChestType(0, randomTable)
   ).wait();
   await (
-    await character.connect(deployer).setRandomTableWithEggType(4, randomTable5)
+    await character
+      .connect(deployer)
+      .setRandomTableWithChestType(1, randomTable2)
   ).wait();
   await (
-    await character.connect(deployer).setRandomTableWithEggType(5, randomTable6)
+    await character
+      .connect(deployer)
+      .setRandomTableWithChestType(2, randomTable3)
   ).wait();
+  // await (
+  //   await character.connect(deployer).setRandomTableWithChestType(3, randomTable4)
+  // ).wait();
+  // await (
+  //   await character.connect(deployer).setRandomTableWithChestType(4, randomTable5)
+  // ).wait();
+  // await (
+  //   await character.connect(deployer).setRandomTableWithChestType(5, randomTable6)
+  // ).wait();
 
   console.log("set random table");
 };
 
-const setEggs = async () => {
+const setChests = async () => {
   const { game: gameAddress } = getAllAddresses();
 
-  const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
+  const game = (await ethers.getContractAt(
+    "ChestMarket",
+    gameAddress
+  )) as ChestMarket;
+  await (
+    await game
+      .connect(deployer)
+      .setChest(0, [ethers.utils.parseEther("570"), 2000])
+  ).wait();
+  await (
+    await game
+      .connect(deployer)
+      .setChest(1, [ethers.utils.parseEther("855"), 500])
+  ).wait();
+  await (
+    await game
+      .connect(deployer)
+      .setChest(2, [ethers.utils.parseEther("1140"), 50])
+  ).wait();
   // await (
-  //   await game.connect(deployer).setEggs(0, [ethers.utils.parseEther("570"), 0])
-  // ).wait();
-  // await (
-  //   await game.connect(deployer).setEggs(1, [ethers.utils.parseEther("855"), 0])
+  //   await game
+  //     .connect(deployer)
+  //     .setChests(3, [ethers.utils.parseEther("4000"), 0])
   // ).wait();
   // await (
   //   await game
   //     .connect(deployer)
-  //     .setEggs(2, [ethers.utils.parseEther("1140"), 0])
+  //     .setChests(4, [ethers.utils.parseEther("8000"), 0])
   // ).wait();
-  await (
-    await game
-      .connect(deployer)
-      .setEggs(3, [ethers.utils.parseEther("4000"), 1000])
-  ).wait();
-  await (
-    await game
-      .connect(deployer)
-      .setEggs(4, [ethers.utils.parseEther("8000"), 400])
-  ).wait();
-  await (
-    await game
-      .connect(deployer)
-      .setEggs(5, [ethers.utils.parseEther("12000"), 100])
-  ).wait();
+  // await (
+  //   await game
+  //     .connect(deployer)
+  //     .setChests(5, [ethers.utils.parseEther("12000"), 0])
+  // ).wait();
 
-  console.log("set egg");
+  console.log("set chest");
 };
 
-const setMaxEggUserCanBuy = async () => {
+const setMaxChestUserCanBuy = async () => {
   const { game: gameAddress } = getAllAddresses();
 
-  const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
+  const game = (await ethers.getContractAt(
+    "ChestMarket",
+    gameAddress
+  )) as ChestMarket;
 
-  await game.connect(deployer).setMaxEggUserCanBuy(10);
+  await game.connect(deployer).setMaxChestUserCanBuy(10);
 };
 
 const addHero = async () => {
   const { character: characterAddress, game: gameAddress } = getAllAddresses();
 
   const character = (await ethers.getContractAt(
-    "BNBHCharacter",
+    "Civilian",
     characterAddress
-  )) as BNBHCharacter;
-
-  // await (await character.connect(deployer).addHero(0)).wait();
-  // await (await character.connect(deployer).addHero(0)).wait();
-  // await (await character.connect(deployer).addHero(1)).wait();
-  // await (await character.connect(deployer).addHero(2)).wait();
-  // await (await character.connect(deployer).addHero(3)).wait();
-  // await (await character.connect(deployer).addHero(3)).wait();
+  )) as Civilian;
 
   (await character.connect(deployer).setHeroTypeLength(0, 2)).wait();
-  (await character.connect(deployer).setHeroTypeLength(1, 1)).wait();
-  (await character.connect(deployer).setHeroTypeLength(2, 1)).wait();
+  (await character.connect(deployer).setHeroTypeLength(1, 2)).wait();
+  (await character.connect(deployer).setHeroTypeLength(2, 2)).wait();
   (await character.connect(deployer).setHeroTypeLength(3, 2)).wait();
+  (await character.connect(deployer).setHeroTypeLength(4, 2)).wait();
   console.log("set hero");
 };
 
 const initialSetup = async () => {
   await setGameAdmin();
-  await setRandomTable();
-  await addHero();
-  await setEggs();
-  // await setMaxEggUserCanBuy();
+  // await setRandomTable();
+  // await addHero();
+  await setChests();
 };
 
 const test = async () => {
   const {
     game: gameAddress,
-    angel: angelAddress,
+    dpt: dptAddress,
     character: characterAddress,
   } = getAllAddresses();
 
   const angel = (await ethers.getContractAt(
     "AngelsCreedToken",
-    angelAddress
+    dptAddress
   )) as AngelsCreedToken;
 
   const character = (await ethers.getContractAt(
-    "BNBHCharacter",
+    "Civilian",
     characterAddress
-  )) as BNBHCharacter;
+  )) as Civilian;
 
-  const game = (await ethers.getContractAt("BNBHero", gameAddress)) as BNBHero;
+  const game = (await ethers.getContractAt(
+    "ChestMarket",
+    gameAddress
+  )) as ChestMarket;
 
   // console.log("getAddressWallet", getAddressWallet());
 
   // await character.connect(deployer).burn(73);
 
-  await game.connect(deployer).setAngelTokenContract(angelAddress);
+  // await game.connect(deployer).setDptTokenContract(dptAddress);
 
   // await character
   //   .connect(deployer)
@@ -240,8 +252,10 @@ const test = async () => {
 
   // await game
   //   .connect(deployer)
-  //   .setmarketingAddress("0x01bcfade840e9079b3dc18e9aaf35a2aca349c7e");
+  //   .setMarketingAddress("0x01bcfade840e9079b3dc18e9aaf35a2aca349c7e");
 
+  // console.log(await game.marketingAddress());
+  // await game.connect(deployer).buyChest(3);
   // await character
   //   .connect(deployer)
   //   .transferFrom(
@@ -253,18 +267,19 @@ const test = async () => {
   // await game
   //   .connect(deployer)
   //   .marketing("0x205f93cd558aac99c4609d0511829194b5405533");
-  // for (let i = 0; i < 6; i++) console.log(await game.eggs(i));
+  // for (let i = 0; i < 6; i++) console.log(await game.chests(i));
   // console.log("hero", await character.getHero(815));
 
-  // for (let i = 0; i < 6; i++) console.log(await game.eggs(i));
-  // ---- read data
-  // for (let i = 0; i < 4; i++) console.log(await character.heroTypeLength(i));
+  // for (let i = 0; i < 6; i++) console.log(await game.chests(i));
+  // // ---- read data
+  console.log(await character.getHero(1));
+  // for (let i = 0; i < 5; i++) console.log(await character.heroTypeLength(i));
   // for (let i = 0; i < 6; i++)
-  //   console.log(await character.getRandomTableWithEggType(i));
+  //   console.log(await character.getRandomTableWithChestType(i));
   // console.log("tokensToCreateHero", await game.tokensToCreateHero(0));
   // console.log("tokensToCreateHero", await game.tokensToCreateHero(1));
   // console.log("characters", await game.characters());
-  // console.log("egg", await game.eggs(0));
+  // console.log("chest", await game.chests(0));
   // console.log(
   //   "tokenId",
   //   await character.tokensOfOwner(await deployer.getAddress())
@@ -285,9 +300,9 @@ const main = async () => {
   // await deployCharacter();
   // await deployGame();
 
-  // await initialSetup();
+  await initialSetup();
 
-  await test();
+  // await test();
 };
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -1,34 +1,32 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-
 import "./IERC20.sol";
-import "./IBNBHCharacter.sol";
+import "./ICivilian.sol";
 import "./HeroLibrary.sol";
 import "./Address.sol";
-import "./AccessControl.sol";
 import "./IERC721Receiver.sol";
 import "./ReentrancyGuard.sol";
 import "./SafeERC20.sol";
+import "./BaseRelayRecipient.sol";
 
-contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
+contract ChestMarket is BaseRelayRecipient, IERC721Receiver, ReentrancyGuard {
   using SafeERC20 for IERC20;
 
-  IBNBHCharacter public characters;
-  IERC20 public angelToken;
-  IERC20 public creedToken;
+  ICivilian public characters;
+  IERC20 public dptToken;
 
-  struct Egg {
-    uint256 angelToBuy;
-    uint256 remainEgg;
+  struct Chest {
+    uint256 dptToBuy;
+    uint256 remainChest;
   }
 
-  uint256 public maxEggUserCanBuy = 10;
-  address public marketingAddress = 0x347871AE7f6DE43b18E2F72d6FAd0191527B96d5;
+  uint256 public maxChestUserCanBuy = 10;
+  address public marketingAddress;
+  address public admin;
 
-  mapping(address => uint256) public users; // so luong trung da mua
-  mapping(uint8 => Egg) public eggs; // egg type => max egg
+  mapping(address => uint256) public users;
+  mapping(uint8 => Chest) public chests; // chest type => max chest
 
   event UpdatedTokenContract(address tokenAddress);
   event UpdatedCharacterContract(address characterAddress);
@@ -40,42 +38,38 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
   );
 
   modifier onlyOwner() {
-    require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+    require(admin == _msgSender(), "Not admin");
     _;
   }
 
-  constructor(
-    IERC20 _angelToken,
-    IERC20 _creedToken,
-    IBNBHCharacter _character
-  ) {
-    _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-
-    angelToken = IERC20(_angelToken);
-    creedToken = IERC20(_creedToken);
+  constructor(IERC20 _dptToken, ICivilian _character) {
+    dptToken = IERC20(_dptToken);
     characters = _character;
   }
 
-  function setMaxEggUserCanBuy(uint256 value) external onlyOwner {
-    maxEggUserCanBuy = value;
+  function setMaxChestUserCanBuy(uint256 value) external onlyOwner {
+    maxChestUserCanBuy = value;
   }
 
-  function setEggs(uint8 eggType, uint256[] memory values) external onlyOwner {
-    eggs[eggType].angelToBuy = values[0];
-    eggs[eggType].remainEgg = values[1];
+  function setChest(uint8 chestType, uint256[] memory values)
+    external
+    onlyOwner
+  {
+    chests[chestType].dptToBuy = values[0];
+    chests[chestType].remainChest = values[1];
   }
 
-  function setAngelTokenContract(address tokenAddress) external onlyOwner {
-    angelToken = IERC20(tokenAddress);
+  function setDptTokenContract(address tokenAddress) external onlyOwner {
+    dptToken = IERC20(tokenAddress);
     emit UpdatedTokenContract(tokenAddress);
   }
 
   function setCharacterContract(address characterAddress) external onlyOwner {
-    characters = IBNBHCharacter(characterAddress);
+    characters = ICivilian(characterAddress);
     emit UpdatedCharacterContract(characterAddress);
   }
 
-  function setmarketingAddress(address _marketingAddress) external onlyOwner {
+  function setMarketingAddress(address _marketingAddress) external onlyOwner {
     marketingAddress = _marketingAddress;
   }
 
@@ -85,7 +79,7 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
         keccak256(
           abi.encodePacked(
             user,
-            angelToken.balanceOf(address(this)),
+            dptToken.balanceOf(address(this)),
             "234324323423",
             block.timestamp,
             block.difficulty
@@ -94,7 +88,7 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
       );
   }
 
-  function buyEgg(uint8 eggType)
+  function buyChest(uint8 chestType)
     external
     nonReentrant
     returns (
@@ -103,37 +97,37 @@ contract BNBHero is AccessControl, IERC721Receiver, ReentrancyGuard {
       uint256
     )
   {
-    require(eggType >= 0 && eggType < 6, "Out of egg type");
+    require(chestType >= 0 && chestType <= 2, "Out of chest type");
     require(
-      users[msg.sender] < maxEggUserCanBuy,
-      "you have bought the allowed egg"
+      users[_msgSender()] < maxChestUserCanBuy,
+      "you have bought the allowed chest"
     );
-    require(eggs[eggType].remainEgg > 0, "Out of egg with type");
-    users[msg.sender]++;
-    eggs[eggType].remainEgg--;
+    require(chests[chestType].remainChest > 0, "Out of chest with type");
+    users[_msgSender()]++;
+    chests[chestType].remainChest--;
 
-    uint256 seed = random(msg.sender);
+    uint256 seed = random(_msgSender());
     (uint256 heroId, uint256 heroRarity, uint256 heroName) = characters.mint(
-      msg.sender,
+      _msgSender(),
       seed,
-      eggType
+      chestType
     );
 
-    uint256 price = eggs[eggType].angelToBuy;
+    uint256 price = chests[chestType].dptToBuy;
 
     require(
-      angelToken.balanceOf(msg.sender) >= price,
+      dptToken.balanceOf(_msgSender()) >= price,
       "not enough balance create hero"
     );
 
-    angelToken.safeTransferFrom(msg.sender, address(this), price);
+    dptToken.safeTransferFrom(_msgSender(), address(this), price);
 
-    emit CreatedHero(msg.sender, heroId, heroRarity, heroName);
+    emit CreatedHero(_msgSender(), heroId, heroRarity, heroName);
     return (heroId, heroRarity, heroName);
   }
 
   function payForOperation(address payer, uint256 amount) internal {
-    angelToken.safeTransferFrom(payer, address(this), amount);
+    dptToken.safeTransferFrom(payer, address(this), amount);
   }
 
   function onERC721Received(

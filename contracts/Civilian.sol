@@ -2,22 +2,20 @@
 
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-
 import "./Strings.sol";
 import "./HeroLibrary.sol";
 import "./ERC721URIStorage.sol";
 import "./AccessControl.sol";
 import "./ERC721Enumerable.sol";
 
-contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
+contract Civilian is AccessControl, ERC721, ERC721URIStorage {
   using Strings for uint256;
   bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
   bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
 
-  uint8[4] public heroTypeLength; // amount of hero in same rarities
+  mapping(uint8 => uint8) public heroTypeLength; // amount of hero in same rarities
 
-  mapping(uint8 => uint8[]) public randomTable; // 6 type egg, 4 rarity
+  mapping(uint8 => uint8[]) public randomTable;
   // Follow pattern ERC721 Enumerable
   HeroLibrary.Hero[] private _heroes;
   mapping(uint256 => uint256) private _heroesIndex;
@@ -27,7 +25,7 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
 
   string private baseURI;
 
-  constructor() ERC721("AngelCharacter", "CHAR") {
+  constructor() ERC721("Civilian", "CIV") {
     HeroLibrary.Hero memory fillGapHero = HeroLibrary.Hero(0, 0, 0);
 
     _heroes.push(fillGapHero);
@@ -59,23 +57,23 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
     _grantRole(GAME_ADMIN, _gameAdmin);
   }
 
-  function setRandomTableWithEggType(uint8 eggType, uint8[] memory values)
+  function setRandomTableWithChestType(uint8 chestType, uint8[] memory values)
     external
     onlyOwner
   {
-    randomTable[eggType] = values;
+    randomTable[chestType] = values;
   }
 
   function setHeroTypeLength(uint8 heroType, uint8 _value) external onlyOwner {
     heroTypeLength[heroType] = _value;
   }
 
-  function getRandomTableWithEggType(uint8 eggType)
+  function getRandomTableWithChestType(uint8 chestType)
     external
     view
     returns (uint8[] memory)
   {
-    return randomTable[eggType];
+    return randomTable[chestType];
   }
 
   function tokensOfOwner(address owner)
@@ -112,10 +110,6 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
       "ERC721Enumerable: global index out of bounds"
     );
     return _heroes[index];
-  }
-
-  function addHero(uint256 rarity) external onlyOwner {
-    heroTypeLength[rarity]++;
   }
 
   function _beforeTokenTransfer(
@@ -210,7 +204,7 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
   function mint(
     address minter,
     uint256 seed,
-    uint8 eggType
+    uint8 chestType
   )
     external
     restricted
@@ -220,7 +214,7 @@ contract BNBHCharacter is AccessControl, ERC721, ERC721URIStorage {
       uint256
     )
   {
-    uint256 heroRarity = randomTable[eggType][seed % 100];
+    uint8 heroRarity = randomTable[chestType][seed % 100];
     uint256 heroName = seed % heroTypeLength[heroRarity];
 
     _safeMint(minter, stateLastTokenId);

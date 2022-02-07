@@ -5,12 +5,12 @@ import "./HeroLibrary.sol";
 import "./IERC721Enumerable.sol";
 import "./ERC721URIStorage.sol";
 
-interface IBNBHCharacter is IERC721Enumerable {
+interface ICivilian is IERC721Enumerable {
   // function heroes() external view returns (Hero[] memory);
   function mint(
     address minter,
     uint256 seed,
-    uint8 eggType
+    uint8 chestType
   )
     external
     returns (
